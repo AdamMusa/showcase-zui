@@ -84,7 +84,7 @@ module Showcase
         bind(chart, :values) { state.pulse }
         row spacing: 14 do
           ring = progress_ring 0, size: 76, thickness: 8, track_color: PANEL_ALT, color: CYAN,
-                               foreground: WHITE, show_label: true, label_format: "%.0f%%",
+                               foreground: WHITE, show_label: true, label_format: "{percent}%",
                                animated: true, font_size: 13
           bind(ring, :value) { state.pulse.last.to_f }
           column spacing: 6, width: 212 do
