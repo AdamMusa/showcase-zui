@@ -43,6 +43,8 @@ module Showcase
 
   module UI
     def sc_catalog_rows
+      return [] unless state.catalog_ready == true
+
       query = state.catalog_query.to_s.strip.downcase
       category = state.catalog_category.to_s
       live = state.live_types
@@ -76,9 +78,10 @@ module Showcase
             sc_caption("Filter #{REGISTRY_COUNT} registered components by name or category.",
                        width: 300, size: 11)
           end
-          field = search_field "", suggestions: COMPONENT_NAMES, live: true, width: 300,
+          field = search_field "", suggestions: [], live: true, width: 300,
                                height: 44, foreground: WHITE, background: PANEL_ALT,
                                accent: CYAN, font_size: 12
+          bind(field, :suggestions) { state.catalog_ready == true ? COMPONENT_NAMES : [] }
           on(field, :input) { |event| state.catalog_query = event["value"].to_s }
           on(field, :clear) { state.catalog_query = "" }
           picker = dropdown ALL_CATEGORIES, label: "Category", options: CATEGORY_OPTIONS,

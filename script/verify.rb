@@ -8,6 +8,10 @@
 #   ruby -Ilib script/verify.rb      # from a Zui checkout
 #   ruby script/verify.rb            # with the zui gem installed
 
+require "json"
+
+# The running application builds one page at a time; this check needs them all.
+ENV["ZUI_SHOWCASE_EAGER"] = "1"
 require_relative "../app"
 
 def walk(node, counts, ids)
@@ -50,7 +54,41 @@ missing_assets = Showcase::ASSETS.reject do |_key, path|
   File.file?(File.join(Showcase::REPO_ROOT, path))
 end
 
+# The native client rejects any render above 2000 nodes or any patch batch
+# above 256, and the protocol frame itself is capped at 1 MiB. Those ceilings
+# are what make the lazy page rendering mandatory rather than merely faster, so
+# the budget each page actually has to fit is checked here.
+page_limit = 2000
+frame_limit = Zui::MAX_MESSAGE_BYTES
+stack = nil
+find_stack = lambda do |node|
+  return if stack
+  return unless node.is_a?(Hash)
+  stack = node if node["type"] == "stack_layout"
+  (node["children"] || []).each { |child| find_stack.call(child) }
+end
+tree.each_value { |surface| find_stack.call(surface) }
+page_nodes = (stack ? stack["children"] : []).map do |child|
+  nodes = []
+  walk(child, {}, nodes)
+  nodes.size
+end
+chrome_nodes = ids.size - page_nodes.sum
+heaviest = page_nodes.max.to_i
+schema_bytes = JSON.generate(Showcase::SCHEMA).bytesize
+
+puts "page budget       #{chrome_nodes} chrome + #{heaviest} heaviest page = #{chrome_nodes + heaviest} of #{page_limit} nodes"
+puts "registry schema   #{schema_bytes} of #{frame_limit} frame bytes"
+puts
+
 failures = []
+if chrome_nodes + heaviest > page_limit
+  failures << "heaviest page plus chrome is #{chrome_nodes + heaviest} nodes, over the client's #{page_limit}"
+end
+unless Showcase::COVERAGE_TYPES == rendered
+  stale = (rendered - Showcase::COVERAGE_TYPES) + (Showcase::COVERAGE_TYPES - rendered)
+  failures << "showcase/coverage_data.rb is stale (#{stale.first(5).join(', ')}); run script/generate_coverage.rb"
+end
 failures << "pages without a builder method: #{missing_pages.map { |p| p[:key] }.join(", ")}" unless missing_pages.empty?
 failures << "duplicate node ids: #{duplicate_ids.first(5).join(", ")}" unless duplicate_ids.empty?
 failures << "unknown component types: #{unknown.join(", ")}" unless unknown.empty?
