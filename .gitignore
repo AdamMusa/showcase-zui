@@ -1,0 +1,21 @@
+# Zui build output
+dist/
+*.gem
+
+# Bundler
+Gemfile.lock
+.bundle/
+vendor/bundle/
+
+# Generated mobile projects
+android/
+ios/
+
+# Editors and tooling
+.ruby-lsp/
+.idea/
+.vscode/
+*.swp
+
+# macOS
+.DS_Store

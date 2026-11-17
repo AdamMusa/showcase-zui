@@ -1,0 +1,12 @@
+# frozen_string_literal: true
+
+source "https://rubygems.org"
+
+# Prefer a local Zui checkout beside the showcase repository, else the gem.
+zui_path = ENV["ZUI_PATH"] || File.expand_path("../../../zui", __dir__)
+
+if File.directory?(zui_path)
+  gem "zui", path: zui_path
+else
+  gem "zui", ">= 0.0.9"
+end
