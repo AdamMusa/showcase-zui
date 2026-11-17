@@ -121,7 +121,7 @@ module Showcase
           column spacing: 10, width: 170 do
             ring = progress_ring 68, size: 86, thickness: 9, track_color: PANEL_ALT,
                                  color: VIOLET, foreground: WHITE, show_label: true,
-                                 label_format: "%.0f%%", animated: true, font_size: 14
+                                 label_format: "{percent}%", animated: true, font_size: 14
             bind(ring, :value) { state.brightness.to_f }
             bar = progress 68, minimum: 0, maximum: 100, width: 170, height: 8, color: VIOLET
             bind(bar, :value) { state.brightness.to_i }
@@ -132,7 +132,7 @@ module Showcase
                    "synchronisation.")
         meter = gauge 68, minimum: 0, maximum: 100, width: CARD_BODY_W, height: 104, color: VIOLET,
                       track_color: PANEL_ALT, thickness: 14, label: "BRIGHTNESS",
-                      label_format: "%.0f%%", show_label: true, font_size: 12
+                      label_format: "%{value}%", show_label: true, font_size: 12
         bind(meter, :value) { state.brightness.to_f }
       end
     end

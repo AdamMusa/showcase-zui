@@ -206,7 +206,7 @@ module Showcase
           end
           column spacing: 6, width: 110 do
             ring = progress_ring 0, size: 56, thickness: 6, track_color: PANEL_ALT, color: MINT,
-                                 show_label: true, label_format: "%.0f%%", animated: true,
+                                 show_label: true, label_format: "{percent}%", animated: true,
                                  font_size: 12
             bind(ring, :value) { state.job_progress.to_f }
             sc_eyebrow("DETERMINATE", color: FAINT)

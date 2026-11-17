@@ -224,7 +224,7 @@ module Showcase
               tags: %w[gauge]) do
         meter = gauge 0, minimum: 0, maximum: 100, width: CHART_W, height: CHART_H,
                       color: MINT, track_color: PANEL_ALT, thickness: 16, label: "THROUGHPUT",
-                      label_format: "%.0f", show_label: true, font_size: 13
+                      label_format: "%{value}", show_label: true, font_size: 13
         bind(meter, :value) { state.pulse.last.to_f }
       end
     end
@@ -235,7 +235,7 @@ module Showcase
         dialled = radial_gauge 0, minimum: 0, maximum: 60, width: CHART_W, height: CHART_H,
                                color: CYAN, track_color: PANEL_ALT, thickness: 14,
                                start_angle: -210, end_angle: 30, label: "LATENCY",
-                               label_format: "%.1f ms", show_label: true, font_size: 13
+                               label_format: "%{value} ms", show_label: true, font_size: 13
         bind(dialled, :value) { state.latency.last.to_f }
       end
     end
