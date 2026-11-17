@@ -137,6 +137,10 @@ module Showcase
       end
     end
 
+    # One property value may not carry more than the client's collection
+    # ceiling, so the demo offers a slice of the registry rather than all of it.
+    SEARCHABLE_SAMPLE = COMPONENT_NAMES.first(MAX_COLLECTION_ITEMS).freeze
+
     def sc_inputs_dropdowns
       sc_card("Dropdowns", "Plain, searchable and multi-select", glyph: :chevron_down,
               accent: GOLD, tags: %w[dropdown searchable_dropdown multi_select tumbler]) do
@@ -149,9 +153,9 @@ module Showcase
           sc_log("Scene: #{state.scene}")
         end
         bind(scene, :value) { state.scene.to_s }
-        sc_eyebrow("SEARCHABLE_DROPDOWN · #{REGISTRY_COUNT} options")
+        sc_eyebrow("SEARCHABLE_DROPDOWN · #{SEARCHABLE_SAMPLE.size} of #{REGISTRY_COUNT} options")
         component = searchable_dropdown "button", label: "Component",
-                                        options: COMPONENT_NAMES,
+                                        options: SEARCHABLE_SAMPLE,
                                         placeholder: "Type to filter…",
                                         empty_text: "No component matches",
                                         trigger_label: "Pick", show_label: true,

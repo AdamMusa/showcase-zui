@@ -4,7 +4,14 @@ module Showcase
   # Absolute path of the repository root, used to launch the bundled demo apps.
   # Relative asset paths stay relative: the renderer resolves those against the
   # directory that holds main.rb.
-  REPO_ROOT = begin
+  # The native client rejects any property value holding more than 256 entries
+# (Service.qml, boundedValue), and it rejects the whole patch, not just the
+# value — a page that sends a longer list simply never appears. Collections
+# stay under this ceiling, with room to spare.
+MAX_COLLECTION_ITEMS = 240
+CATALOG_PAGE_SIZE = 200
+
+REPO_ROOT = begin
     File.expand_path("..", File.dirname(__FILE__))
   rescue StandardError
     "."
@@ -37,11 +44,18 @@ module Showcase
   # Window metrics. Zui applications size natively in device-independent pixels,
   # so the showcase lays out on an explicit grid instead of a fluid web box model.
   WINDOW_W    = 1440
-  WINDOW_H    = 920
+  # A window taller than the screen is silently clipped by the window manager,
+  # and the application has no way to find that out: an `app` surface is not an
+  # `application_window`, so nothing delivers its resize event to Ruby. The
+  # default therefore has to fit a laptop screen rather than assume one.
+  WINDOW_H    = 780
   SIDEBAR_W   = 272
   CONTENT_W   = WINDOW_W - SIDEBAR_W
   TOPBAR_H    = 88
   PAGE_H      = WINDOW_H - TOPBAR_H
+  SIDEBAR_FOOTER_H = 92
+  # The rail holds sixteen fixed-height entries; whatever is left over scrolls.
+  NAV_H       = WINDOW_H - TOPBAR_H - SIDEBAR_FOOTER_H - 2
   CARD_W      = 356
   CARD_BODY_W = CARD_W - 40
   WIDE_W      = CARD_W * 2 + 16

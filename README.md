@@ -24,10 +24,10 @@ rail, the cards, the charts, the shaders and the dialogs are all framework compo
 Ruby state.
 
 <p align="center">
-  <img src="demos/futuristic_dashboard/preview.png" width="860" alt="Nebula Command, one of the twelve demo applications bundled in this repository">
+  <img src="assets/showcase-home.jpg" width="900" alt="The showcase's home page: the navigation rail, the hero card with live registry counts, and the first row of component cards">
 </p>
 
-<p align="center"><sub>Nebula Command — one of the twelve bundled demo apps, launchable from the showcase's Demo apps page.</sub></p>
+<p align="center"><sub>The showcase's own home page, captured from the running application.</sub></p>
 
 ## Quick start
 
