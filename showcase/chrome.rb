@@ -13,12 +13,28 @@ module Showcase
       end
     end
 
+    # Only the page you are looking at exists as a control tree. The native
+    # client validates at most 2000 nodes per render and 256 patches per batch,
+    # and all sixteen pages together are 4060 nodes, so building them eagerly
+    # cannot be shown at all. Rendering one page keeps the first frame small,
+    # the startup fast, and every later patch batch far inside its ceiling.
+    #
+    # `Showcase.eager?` restores the full tree for script/verify.rb, which has
+    # to inspect every page in one pass.
     def sc_stack
       stack_layout width: CONTENT_W, height: PAGE_H do
         property :current_index do
           state.page.to_i
         end
-        PAGES.each { |page| public_send("sc_page_#{page[:key]}") }
+        PAGES.each_with_index do |page, index|
+          if Showcase.eager?
+            public_send("sc_page_#{page[:key]}")
+          else
+            dynamic(type: :column, width: CONTENT_W, height: PAGE_H) do
+              public_send("sc_page_#{page[:key]}") if state.page.to_i == index
+            end
+          end
+        end
       end
     end
 

@@ -4,6 +4,7 @@ require "zui"
 
 require_relative "showcase/theme"
 require_relative "showcase/catalog_data"
+require_relative "showcase/coverage_data"
 require_relative "showcase/assets"
 require_relative "showcase/demos"
 require_relative "showcase/nav"
@@ -27,6 +28,14 @@ require_relative "showcase/pages/apps"
 require_relative "showcase/pages/about"
 
 module Showcase
+  # Page bodies are built on demand so the first frame stays small and fast.
+  # script/verify.rb sets ZUI_SHOWCASE_EAGER=1 to get the whole tree at once.
+  def self.eager?
+    defined?(ENV) && ENV["ZUI_SHOWCASE_EAGER"].to_s == "1"
+  rescue StandardError
+    false
+  end
+
   # Walks the built surface tree and reports which component types are really
   # on screen, so the catalog can mark them without a hand-maintained list.
   def self.rendered_types(tree)
@@ -61,6 +70,7 @@ module Showcase
       state :live_count, 0
 
       # -------------------------------------------------------------- catalog
+      state :catalog_ready, false
       state :catalog_query, ""
       state :catalog_category, ALL_CATEGORIES
       state :catalog_selected, "button"
@@ -241,11 +251,17 @@ module Showcase
 
       # The catalog marks every component the showcase actually renders. The
       # count comes from the finished node tree, never from a curated list.
-      rendered = Showcase.rendered_types(@application.tree)
+      rendered = Showcase.eager? ? Showcase.rendered_types(@application.tree) : COVERAGE_TYPES
       transaction do
         state.live_types = rendered
         state.live_count = rendered.size
       end
+
+      # The component registry is large enough that sending its table rows and
+      # search suggestions inside the first render frame would push that frame
+      # past the protocol's 1 MiB ceiling. They are pure data, so they arrive
+      # as a patch immediately after the window appears instead.
+      after(0.05) { state.catalog_ready = true }
 
       # One scheduler drives every "live" card in the application.
       every(1.0) do
