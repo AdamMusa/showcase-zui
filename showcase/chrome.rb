@@ -67,7 +67,7 @@ module Showcase
     end
 
     def sc_nav_list
-      rectangle width: SIDEBAR_W, padding: 12, color: PANEL do
+      scroll width: SIDEBAR_W, height: NAV_H, clip: true do
         column spacing: 2, width: SIDEBAR_W - 24 do
           PAGES.each_with_index do |page, index|
             item = item_delegate page[:label], value: index, icon: page[:glyph],
@@ -87,7 +87,7 @@ module Showcase
     end
 
     def sc_sidebar_footer
-      rectangle width: SIDEBAR_W, height: 92, padding: 16, color: PANEL do
+      rectangle width: SIDEBAR_W, height: SIDEBAR_FOOTER_H, padding: 16, color: PANEL do
         column spacing: 6, width: SIDEBAR_W - 32 do
           row spacing: 8 do
             sc_stat("COMPONENTS", REGISTRY_COUNT, CYAN, width: 108)

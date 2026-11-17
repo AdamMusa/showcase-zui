@@ -142,8 +142,12 @@ module Showcase
       end
     end
 
-    def sc_row(spacing: 16, &body)
-      row spacing: spacing do
+    # Rows of cards align to their top edge. A `row` centres its children
+    # vertically by default (ControlNode.qml, rowChildDelegate), so a short card
+    # beside a tall one floats to the middle of the row and leaves a gap above
+    # and below it. Card grids read as a grid only when their tops line up.
+    def sc_row(spacing: 16, alignment: :start, &body)
+      row spacing: spacing, alignment: alignment do
         instance_eval(&body) if body
       end
     end

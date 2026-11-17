@@ -71,6 +71,7 @@ module Showcase
 
       # -------------------------------------------------------------- catalog
       state :catalog_ready, false
+      state :catalog_page, 0
       state :catalog_query, ""
       state :catalog_category, ALL_CATEGORIES
       state :catalog_selected, "button"

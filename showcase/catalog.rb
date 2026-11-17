@@ -59,6 +59,49 @@ module Showcase
       rows.map { |row| row.merge("live" => live.include?(row["component"]) ? "yes" : "·") }
     end
 
+    # The table shows one page at a time: 306 rows in a single property value
+    # would exceed the client's collection ceiling and the patch carrying the
+    # whole page would be rejected.
+    def sc_catalog_page_count
+      [(sc_catalog_rows.size + CATALOG_PAGE_SIZE - 1) / CATALOG_PAGE_SIZE, 1].max
+    end
+
+    def sc_catalog_offset
+      page = state.catalog_page.to_i
+      page = sc_catalog_page_count - 1 if page >= sc_catalog_page_count
+      [page, 0].max * CATALOG_PAGE_SIZE
+    end
+
+    def sc_catalog_visible_rows
+      sc_catalog_rows.slice(sc_catalog_offset, CATALOG_PAGE_SIZE) || []
+    end
+
+    def sc_catalog_range_text
+      total = sc_catalog_rows.size
+      return "No component matches" if total.zero?
+
+      first = sc_catalog_offset + 1
+      last = [sc_catalog_offset + CATALOG_PAGE_SIZE, total].min
+      "Showing #{first}-#{last} of #{total}"
+    end
+
+    def sc_catalog_pager
+      row spacing: 10, alignment: :center do
+        previous = button "Previous", width: 108, height: 32, font_size: 11,
+                          background: PANEL_ALT, foreground: WHITE, accent: CYAN do
+          state.catalog_page = [state.catalog_page.to_i - 1, 0].max
+        end
+        bind(previous, :enabled) { state.catalog_page.to_i.positive? }
+        nxt = button "Next", width: 108, height: 32, font_size: 11,
+                     background: PANEL_ALT, foreground: WHITE, accent: CYAN do
+          state.catalog_page = [state.catalog_page.to_i + 1, sc_catalog_page_count - 1].min
+        end
+        bind(nxt, :enabled) { state.catalog_page.to_i < sc_catalog_page_count - 1 }
+        range = sc_caption(sc_catalog_range_text, width: 420, size: 11)
+        bind(range, :text) { sc_catalog_range_text }
+      end
+    end
+
     def sc_page_catalog
       sc_page do
         sc_catalog_controls
@@ -81,14 +124,29 @@ module Showcase
           field = search_field "", suggestions: [], live: true, width: 300,
                                height: 44, foreground: WHITE, background: PANEL_ALT,
                                accent: CYAN, font_size: 12
-          bind(field, :suggestions) { state.catalog_ready == true ? COMPONENT_NAMES : [] }
-          on(field, :input) { |event| state.catalog_query = event["value"].to_s }
-          on(field, :clear) { state.catalog_query = "" }
+          bind(field, :suggestions) do
+            state.catalog_ready == true ? COMPONENT_NAMES.first(MAX_COLLECTION_ITEMS) : []
+          end
+          on(field, :input) do |event|
+            transaction do
+              state.catalog_query = event["value"].to_s
+              state.catalog_page = 0
+            end
+          end
+          on(field, :clear) do
+            transaction do
+              state.catalog_query = ""
+              state.catalog_page = 0
+            end
+          end
           picker = dropdown ALL_CATEGORIES, label: "Category", options: CATEGORY_OPTIONS,
                             show_label: false, foreground: WHITE, background: PANEL_ALT,
                             popup_border: BORDER, accent: CYAN, row_height: 40,
                             popup_row_height: 34 do |event|
-            state.catalog_category = event["value"].to_s
+            transaction do
+              state.catalog_category = event["value"].to_s
+              state.catalog_page = 0
+            end
           end
           bind(picker, :value) { state.catalog_category.to_s }
           counter = sc_stat("MATCHING", REGISTRY_COUNT, CYAN, width: 110)
@@ -111,7 +169,8 @@ module Showcase
                            selected_foreground: CYAN, muted: FAINT, accent: CYAN,
                            grid_color: BORDER_SOFT, border_color: BORDER, radius: 12,
                            font_size: 11, header_size: 10, empty_text: "No component matches"
-        bind(table, :rows) { sc_catalog_rows }
+        bind(table, :rows) { sc_catalog_visible_rows }
+        sc_catalog_pager
         on(table, :cell_click) do |event|
           row = event["row_data"]
           next unless row.is_a?(Hash)
