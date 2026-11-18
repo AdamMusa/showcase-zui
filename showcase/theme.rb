@@ -76,6 +76,8 @@ REPO_ROOT = begin
   CARD_H      = 420
   CARD_H_S    = 300
   CARD_H_L    = 520
+  # The effect cards carry four stacked image passes each.
+  EFFECT_CARD_H = 560
   WIDE_W      = CARD_W * 2 + 16
   FULL_W      = CARD_W * 3 + 32
 

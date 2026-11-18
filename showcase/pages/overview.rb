@@ -105,7 +105,7 @@ module Showcase
     end
 
     def sc_overview_jump
-      sc_card("Jump anywhere", "Sixteen pages, one stack_layout", glyph: :link, accent: VIOLET,
+      sc_card("Jump anywhere", "#{PAGES.size} pages, one stack_layout", glyph: :link, accent: VIOLET,
               tags: %w[item_delegate stack_layout navigation_rail]) do
         column spacing: 4, width: CARD_BODY_W do
           PAGES.each_with_index do |page, index|
