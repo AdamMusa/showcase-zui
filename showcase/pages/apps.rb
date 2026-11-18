@@ -65,8 +65,8 @@ module Showcase
     end
 
     def sc_demo_card(demo)
-      card width: CARD_W, padding: 20, spacing: 14, color: PANEL, border_color: BORDER,
-           accent: demo[:accent] do
+      card width: CARD_W, padding: CARD_PAD, spacing: 14, color: PANEL, border_color: BORDER,
+           accent: demo[:accent], alignment: :start do
         sc_demo_hero(demo)
         row spacing: 10 do
           sc_tile(demo[:glyph], accent: demo[:accent], size: 34, radius: 10, glyph_size: 15)
