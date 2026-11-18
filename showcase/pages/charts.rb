@@ -3,32 +3,34 @@
 module Showcase
   CHART_W = CARD_BODY_W
   CHART_H = 150
+  # head + chart + a caption line + tags, with nothing left over.
+  CHART_CARD_H = 348
 
   module UI
     def sc_page_charts
       sc_page do
         sc_charts_intro
-        sc_row do
+        sc_row height: CHART_CARD_H do
           sc_chart_line
           sc_chart_area
           sc_chart_spark
         end
-        sc_row do
+        sc_row height: CHART_CARD_H do
           sc_chart_bar
           sc_chart_stacked
           sc_chart_histogram
         end
-        sc_row do
+        sc_row height: CHART_CARD_H do
           sc_chart_pie
           sc_chart_donut
           sc_chart_radar
         end
-        sc_row do
+        sc_row height: CHART_CARD_H do
           sc_chart_scatter
           sc_chart_bubble
           sc_chart_heatmap
         end
-        sc_row do
+        sc_row height: CHART_CARD_H do
           sc_chart_gauge
           sc_chart_radial
           sc_chart_candles

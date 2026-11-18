@@ -103,13 +103,30 @@ module Showcase
     end
 
     # ------------------------------------------------------------------- cards
+    # Every card in a grid row is the same height, so the row reads as a grid
+    # instead of a ragged edge. The heading stays pinned to the top of the card
+    # and the body scrolls inside it, which is why a card with a great deal to
+    # show (sixteen navigation entries, thirty swatches) no longer decides how
+    # much empty space its neighbours carry. `height: nil` opts a card out.
     def sc_card(heading, subtitle, glyph: :circle_info, accent: CYAN, tags: [], width: CARD_W,
-                color: PANEL, padding: 20, spacing: 14, &body)
-      card width: width, padding: padding, spacing: spacing, color: color, border_color: BORDER,
-           accent: accent do
-        sc_head(glyph, heading, subtitle, accent: accent, width: width - padding * 2)
-        instance_eval(&body) if body
-        sc_tags(tags, width: width - padding * 2)
+                height: :row, color: PANEL, padding: CARD_PAD, spacing: 14, &body)
+      height = @sc_card_height || CARD_H if height == :row
+      body_w = width - padding * 2
+      card width: width, height: height, padding: padding, spacing: spacing, color: color,
+           border_color: BORDER, accent: accent, alignment: height ? :start : :center do
+        sc_head(glyph, heading, subtitle, accent: accent, width: body_w)
+        if height
+          scroll width: body_w, height: height - padding * 2 - CARD_HEAD_H - spacing,
+                 clip: true do
+            column spacing: spacing, width: body_w do
+              instance_eval(&body) if body
+              sc_tags(tags, width: body_w)
+            end
+          end
+        else
+          instance_eval(&body) if body
+          sc_tags(tags, width: body_w)
+        end
       end
     end
 
@@ -146,10 +163,14 @@ module Showcase
     # vertically by default (ControlNode.qml, rowChildDelegate), so a short card
     # beside a tall one floats to the middle of the row and leaves a gap above
     # and below it. Card grids read as a grid only when their tops line up.
-    def sc_row(spacing: 16, alignment: :start, &body)
+    def sc_row(spacing: 16, alignment: :start, height: nil, &body)
+      previous = @sc_card_height
+      @sc_card_height = height || CARD_H
       row spacing: spacing, alignment: alignment do
         instance_eval(&body) if body
       end
+    ensure
+      @sc_card_height = previous
     end
   end
 end
