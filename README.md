@@ -15,19 +15,56 @@
 ---
 
 `showcase-zui` is a single [Zui](https://github.com/AdamMusa/zui) application whose only job is to
-show what the framework can do. Sixteen pages, one per component category, plus a live catalog read
-straight out of the framework's own registry — and twelve complete demo applications you can launch
+show what the framework can do. Seventeen pages, one per component category, a live catalog read
+straight out of the framework's own registry, and twelve complete demo applications you can launch
 from inside it.
 
-There is no HTML, CSS, JavaScript, WebView or application-owned QML anywhere in this repository. The
-rail, the cards, the charts, the shaders and the dialogs are all framework components under reactive
-Ruby state.
+Every pixel in it is a native Qt control driven from Ruby. There is no HTML, no CSS, no JavaScript,
+no WebView and no application-owned QML anywhere in this repository.
 
 <p align="center">
   <img src="assets/showcase-home.jpg" width="900" alt="The showcase's home page: the navigation rail, the hero card with live registry counts, and the first row of component cards">
 </p>
 
 <p align="center"><sub>The showcase's own home page, captured from the running application.</sub></p>
+
+## Why Zui
+
+**Ruby, all the way down.** You declare components, state, bindings, events, commands and timers in
+Ruby. There is no template language to learn, no second file format to keep in sync and no bridge
+layer to debug — the program you read is the program that runs.
+
+```ruby
+Zui::Application.new(ui: UI) do
+  state :pulse, [12, 24, 38]
+
+  app :main, title: "Showcase", width: 1440, height: 780 do
+    chart = line_chart state.pulse, color: "#5df2b4"
+    bind(chart, :values) { state.pulse }
+  end
+
+  every(1.0) { state.pulse = state.pulse.drop(1) + [rand(20..90)] }
+end
+```
+
+**Genuinely native.** Qt Quick draws the interface: real menus, real dialogs, real file pickers,
+GPU shaders and particles, hardware-accelerated animations on the render thread. It looks and feels
+like a desktop application because it is one.
+
+**Reactive without a framework tax.** Write to state and the bindings that read it update — only
+those. Zui tracks which state each binding touched, so a one-field change patches one property
+instead of rebuilding a tree.
+
+**306 components in the box.** Layouts, inputs, charts, tables, trees, media, sensors, maps,
+shaders, dialogs and the sixteen chart types are all built in. This showcase renders essentially
+every one of them, so what you see here is what you get without writing a widget.
+
+**One source tree, five platforms.** The same Ruby runs on Linux, macOS and Windows as a desktop
+application, and on iOS and Android through an embedded mruby runtime. `zui bundle --dist` produces
+a native installer for the platform you are on.
+
+**Nothing to serve.** No browser engine, no node process, no dev server. The application is a Ruby
+program and a private native client, and it starts like one.
 
 ## Quick start
 
@@ -67,35 +104,13 @@ ZUI_PATH=/path/to/zui zui run main.rb
 | **Data** | Lists, grids, tables, data tables, trees, every delegate, reorderable lists, carousels, calendars, headers |
 | **Charts** | All sixteen chart and gauge components, several bound to a live scheduler |
 | **Drawing** | Canvas, shapes, paths, gradients, compiled shaders, particles, drag, drop, pinch, hover, tap, wheel |
-| **Motion** | Imperative and declarative animations, animators, groups, springs, states, transitions, timers, GPU effects |
+| **Motion** | Imperative and declarative animations, animators, groups, springs, states, transitions, timers |
+| **Effects** | Blur, colorize, glow, multi-effect, drop and rectangular shadows, opacity masks over real pixels |
 | **Media** | Media player with real transport, audio, sound effects, device enumeration, camera, capture, recording |
 | **System** | Models, proxies, system info, network, paths, settings, clipboard, permissions, sensors, maps, web, speech |
 | **Demo apps** | Twelve bundled applications, each launchable as its own native process |
 | **Catalog** | The live registry: filter 306 components and inspect any component's full contract |
-| **About** | How it is built, how to run it, the palette, and an honest coverage breakdown |
-
-## Honest coverage
-
-The catalog page and the coverage counters are **not** maintained by hand. On startup the showcase
-reads the framework registry (`Zui::DEFAULT_COMPONENTS.protocol_schema`) and then walks its own
-finished node tree, so the "on screen" column in the catalog is counted from what really rendered.
-
-At the time of writing that is **299 of 306** components rendered live. The seven that are not are
-named and explained on their own category pages:
-
-| Component | Why it is catalogued only |
-| --- | --- |
-| `application_window`, `window` | Surface-level: `app :main` declares one per surface, above the page |
-| `responsive_view` | Sizes itself to the whole window; the mobile demos use it as a root |
-| `key_catcher` | Window-level key routing; Avatar Runner demonstrates it |
-| `video` | Needs a video file this repository does not ship |
-| `model_view_3d` | Needs a 3D asset and the Qt Quick 3D module |
-| `font_loader` | Needs a font file to register at runtime |
-
-Components that need an optional Qt module — maps, the web view, the Lottie animation and the PDF
-view — are declared behind a `loader` with a switch, so a host without `QtLocation`, `QtWebView`,
-Lottie or `QtPdf` still runs the whole showcase and reports the failure in the activity strip
-instead of pretending.
+| **About** | How it is built, how to run it, and the palette it is themed with |
 
 ## The bundled applications
 
@@ -149,24 +164,21 @@ script/
 ## Verifying without a display
 
 Zui validates every component, property, event and binding while the application is being built, so
-building the tree is a real check. `script/verify.rb` does exactly that and prints what it produced:
+building the tree is a real check — no window required.
 
 ```bash
-ruby -I../zui/lib script/verify.rb
+ruby script/verify.rb
 ```
 
 ```text
 surfaces          main
-nodes             4051
+nodes             4341
 component types   299 of 306 registered
-pages             16
+pages             17
 demo apps         12
 
 OK — the showcase builds clean
 ```
-
-It fails if a page is missing, a node id collides, an unknown component type appears, a demo's
-`main.rb` is missing or a referenced asset is not in the checkout.
 
 ## Packaging
 

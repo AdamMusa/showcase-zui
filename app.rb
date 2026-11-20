@@ -22,6 +22,7 @@ require_relative "showcase/pages/data"
 require_relative "showcase/pages/charts"
 require_relative "showcase/pages/drawing"
 require_relative "showcase/pages/motion"
+require_relative "showcase/pages/effects"
 require_relative "showcase/pages/media"
 require_relative "showcase/pages/system"
 require_relative "showcase/pages/apps"
@@ -245,8 +246,8 @@ module Showcase
 
       # ------------------------------------------------------------ the window
       app :main, title: "Zui Showcase · #{REGISTRY_COUNT} native components",
-                 width: WINDOW_W, height: WINDOW_H, min_width: 1180, min_height: 760,
-                 color: INK do
+                 width: WINDOW_W, height: WINDOW_H, min_width: 1180, min_height: 720,
+                 padding: WINDOW_PAD, color: INK do
         showcase_root
       end
 

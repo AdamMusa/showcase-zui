@@ -15,7 +15,7 @@ module Showcase
 
     # Only the page you are looking at exists as a control tree. The native
     # client validates at most 2000 nodes per render and 256 patches per batch,
-    # and all sixteen pages together are 4060 nodes, so building them eagerly
+    # and all the pages together are over four thousand nodes, so building them eagerly
     # cannot be shown at all. Rendering one page keeps the first frame small,
     # the startup fast, and every later patch batch far inside its ceiling.
     #
